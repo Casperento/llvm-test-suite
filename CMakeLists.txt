@@ -136,6 +136,10 @@ Make sure it is in your path or set TEST_SUITE_COLLECT_CODE_SIZE to OFF")
   endif()
 endif()
 
+option(TEST_SUITE_COLLECT_INSTCOUNT "Count number of instructions in LLVM bitcodes" OFF)
+option(TEST_SUITE_SELECTED_PASSES "List of passes to test, separated by a ','" "")
+option(TEST_SUITE_PASSES_ARGS "List of passes' arguments: string of '-' options" "")
+
 option(TEST_SUITE_USE_IR_PGO
   "Use IR PGO instrumentation (requires TEST_SUITE_PROFILE_GENERATE)" OFF)
 
@@ -374,6 +378,9 @@ if(TEST_SUITE_RUN_BENCHMARKS)
 endif()
 if(TEST_SUITE_COLLECT_CODE_SIZE)
   list(APPEND LIT_MODULES codesize)
+endif()
+if(TEST_SUITE_COLLECT_INSTCOUNT)
+  list(APPEND LIT_MODULES instcount)
 endif()
 list(APPEND LIT_MODULES hash)
 if(TEST_SUITE_COLLECT_COMPILE_TIME)
