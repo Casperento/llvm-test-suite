@@ -8,6 +8,7 @@ set(LITSUPPORT_FILES
   testplan.py
   test.py
   modules/codesize.py
+  modules/instcount.py
   modules/compiletime.py
   modules/hash.py
   modules/hpmcount.py

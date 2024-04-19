@@ -63,10 +63,25 @@ function(llvm_test_executable_no_test target)
   set_property(GLOBAL APPEND PROPERTY TEST_SUITE_TARGETS ${target})
   test_suite_add_build_dependencies(${target})
 
-  if(TEST_SUITE_LLVM_SIZE)
+  if(TEST_SUITE_ARBITRARY_PASS)
     add_custom_command(TARGET ${target} POST_BUILD
-      COMMAND ${TEST_SUITE_LLVM_SIZE} --format=sysv $<TARGET_FILE:${target}>
-      > $<TARGET_FILE:${target}>.size)
+      COMMAND objcopy $<TARGET_FILE:${target}> --dump-section .llvmbc=$<TARGET_FILE:${target}>.bc
+      COMMAND opt -passes=${TEST_SUITE_SELECTED_PASSES} ${TEST_SUITE_PASSES_ARGS} $<TARGET_FILE:${target}>.bc -o $<TARGET_FILE:${target}>.bc 2> /dev/null
+      COMMAND opt -disable-output -stats -passes=instcount $<TARGET_FILE:${target}>.bc 2>&1 | 
+        awk "/\(of all types\)/{print}" > $<TARGET_FILE:${target}>.instcount
+      COMMAND ${CMAKE_CXX_COMPILER} $<TARGET_FILE:${target}>.bc
+              -O0
+              ${CFLAGS} ${CPPFLAGS} ${CXXFLAGS} 
+              -o $<TARGET_FILE:${target}>
+      COMMAND ${TEST_SUITE_LLVM_SIZE} --format=sysv $<TARGET_FILE:${target}> > $<TARGET_FILE:${target}>.size
+      VERBATIM
+    )
+  else()
+    if(TEST_SUITE_LLVM_SIZE)
+      add_custom_command(TARGET ${target} POST_BUILD
+        COMMAND ${TEST_SUITE_LLVM_SIZE} --format=sysv $<TARGET_FILE:${target}>
+        > $<TARGET_FILE:${target}>.size)
+    endif()
   endif()
 endfunction()
 
