@@ -66,9 +66,19 @@ function(llvm_test_executable_no_test target)
   if(TEST_SUITE_COLLECT_INSTCOUNT)
     add_custom_command(TARGET ${target} POST_BUILD
       COMMAND objcopy $<TARGET_FILE:${target}> --dump-section .llvmbc=$<TARGET_FILE:${target}>.bc
+      COMMAND opt -passes=mem2reg,lcssa $<TARGET_FILE:${target}>.bc -o $<TARGET_FILE:${target}>.bc
+      COMMAND opt -S $<TARGET_FILE:${target}>.bc -o $<TARGET_FILE:${target}>.lb
       COMMAND opt -passes=${TEST_SUITE_SELECTED_PASSES} ${TEST_SUITE_PASSES_ARGS} $<TARGET_FILE:${target}>.bc -o $<TARGET_FILE:${target}>.bc 2> /dev/null
-      COMMAND ${CMAKE_CXX_COMPILER} -Os -fembed-bitcode ${CFLAGS} ${CPPFLAGS} ${CXXFLAGS} -o $<TARGET_FILE:${target}> $<TARGET_FILE:${target}>.bc
+      COMMAND opt -S $<TARGET_FILE:${target}>.bc -o $<TARGET_FILE:${target}>.la
+      COMMAND ${CMAKE_CXX_COMPILER} $<TARGET_FILE:${target}>.bc 
+              -Os
+              -flto
+              -fuse-ld=lld
+              -Wl,--plugin-opt=-lto-embed-bitcode=post-merge-pre-opt
+              ${CFLAGS} ${CPPFLAGS} ${CXXFLAGS} 
+              -o $<TARGET_FILE:${target}>
       COMMAND objcopy $<TARGET_FILE:${target}> --dump-section .llvmbc=$<TARGET_FILE:${target}>.bc
+      COMMAND opt -S $<TARGET_FILE:${target}>.bc -o $<TARGET_FILE:${target}>.os
       COMMAND opt -disable-output -stats -passes=instcount $<TARGET_FILE:${target}>.bc 2>&1 | 
               awk "/\(of all types\)/{print}" > $<TARGET_FILE:${target}>.instcount
       COMMAND ${TEST_SUITE_LLVM_SIZE} --format=sysv $<TARGET_FILE:${target}> > $<TARGET_FILE:${target}>.size

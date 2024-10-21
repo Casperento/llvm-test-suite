@@ -1,5 +1,5 @@
 """Test module to collect code size metrics of the benchmark executable."""
-import os.path
+import os
 
 
 def sumInstCount(filepath, metrics):
@@ -9,17 +9,17 @@ def sumInstCount(filepath, metrics):
             if line == '':
                 continue
             instcount = line.split(' instcount')
-            metrics['instcount'] += int(instcount[0])
+            metrics['instcount'] = int(instcount[0])
 
 
 def _getInstCount(context):
-    metrics = {}
-    metrics['instcount'] = 0
+    metrics = {'instcount': 0}
     testname = context.test.getSourcePath()
     testdirname = os.path.dirname(testname)
+    targetname = os.path.basename(os.path.splitext(testname)[0])
     if os.path.exists(testdirname):
         for ff in os.listdir(testdirname):
-            if ff.endswith('.instcount'):
+            if ff == f'{targetname}.instcount':
                 filepath = os.path.join(testdirname, ff)
                 sumInstCount(filepath, metrics)
     return metrics
