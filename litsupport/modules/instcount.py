@@ -2,26 +2,19 @@
 import os
 
 
-def sumInstCount(filepath, metrics):
-    with open(filepath, 'r') as fp:
-        for line in fp:
-            line = line.strip()
-            if line == '':
-                continue
-            instcount = line.split(' instcount')
-            metrics['instcount'] = int(instcount[0])
-
-
 def _getInstCount(context):
-    metrics = {'instcount': 0}
     testname = context.test.getSourcePath()
     testdirname = os.path.dirname(testname)
-    targetname = os.path.basename(os.path.splitext(testname)[0])
-    if os.path.exists(testdirname):
-        for ff in os.listdir(testdirname):
-            if ff == f'{targetname}.instcount':
-                filepath = os.path.join(testdirname, ff)
-                sumInstCount(filepath, metrics)
+    targetbasename = os.path.basename(os.path.splitext(testname)[0])
+    filepath = os.path.join(testdirname, f'{targetbasename}.instcount')
+    metrics = {'instcount': 0}
+    if os.path.exists(filepath):
+        with open(filepath, 'r') as fp:
+            line = fp.readline().strip()
+            if line == '':
+                return metrics
+            instcount = line.split(' instcount')
+            metrics['instcount'] = int(instcount[0])
     return metrics
 
 
