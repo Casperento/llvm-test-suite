@@ -67,8 +67,8 @@ function(llvm_test_executable_no_test target)
     add_custom_command(TARGET ${target} POST_BUILD
     COMMAND objcopy $<TARGET_FILE:${target}> --dump-section .llvmbc=$<TARGET_FILE:${target}>.bc
     COMMAND objcopy $<TARGET_FILE:${target}> --dump-section .llvmbc=$<TARGET_FILE:${target}>.e.bc
-    COMMAND opt -passes=mem2reg,lcssa $<TARGET_FILE:${target}>.bc -o $<TARGET_FILE:${target}>.bc
-    COMMAND opt -passes=mem2reg,lcssa $<TARGET_FILE:${target}>.e.bc -o $<TARGET_FILE:${target}>.e.bc
+    COMMAND opt -passes=mem2reg,lcssa,break-crit-edges $<TARGET_FILE:${target}>.bc -o $<TARGET_FILE:${target}>.bc
+    COMMAND opt -passes=mem2reg,lcssa,break-crit-edges $<TARGET_FILE:${target}>.e.bc -o $<TARGET_FILE:${target}>.e.bc
       COMMAND opt -passes=${TEST_SUITE_SELECTED_PASSES} ${TEST_SUITE_PASSES_ARGS} $<TARGET_FILE:${target}>.bc -o $<TARGET_FILE:${target}>.bc 2> /dev/null
       COMMAND opt --Os $<TARGET_FILE:${target}>.bc -o $<TARGET_FILE:${target}>.bc
       COMMAND ${CMAKE_CXX_COMPILER} $<TARGET_FILE:${target}>.bc
