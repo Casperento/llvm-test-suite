@@ -19,6 +19,9 @@ def _getCompileTime(context):
             if file.endswith(".o.time") and file.startswith(prefix):
                 fullpath = os.path.join(path, file)
                 compile_time += timeit.getUserTime(fullpath)
+            if file.endswith(".passes.time") and file.startswith(prefix):
+                fullpath = os.path.join(path, file)
+                compile_time += timeit.getUserTime(fullpath)
             if file.endswith(".link.time") and file.startswith(prefix):
                 fullpath = os.path.join(path, file)
                 link_time += timeit.getUserTime(fullpath)
