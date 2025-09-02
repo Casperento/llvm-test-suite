@@ -64,7 +64,7 @@ function(llvm_test_executable_no_test target)
   test_suite_add_build_dependencies(${target})
 
   if(TEST_SUITE_COLLECT_INSTCOUNT)
-    if(TEST_SUITE_COLLECT_COMPILE_TIME)
+    if(TEST_SUITE_COLLECT_COMPILE_TIME AND TEST_SUITE_SELECTED_PASSES AND NOT TEST_SUITE_SELECTED_PASSES STREQUAL "")
       add_custom_command(TARGET ${target} POST_BUILD
         COMMAND objcopy $<TARGET_FILE:${target}> --dump-section .llvmbc=$<TARGET_FILE:${target}>.bc
         COMMAND objcopy $<TARGET_FILE:${target}> --dump-section .llvmbc=$<TARGET_FILE:${target}>.e.bc
